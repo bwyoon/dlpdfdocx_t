@@ -1,0 +1,35 @@
+#
+# script for downloading pdf and docx files from teacher's schedule page
+# teachers.io version
+#
+# Bokwon Yoon (c) 2016
+#
+# Use this script on your own responsibility.
+#
+# ex) ./dlpdfdocx_t https://teachers.io/MsEMath/classes/algebra-1/accelerated-algebra/schedule
+#  
+
+parenturl=$(echo $1 | sed -n -r 's/(https?:\/\/[^\/]+).+/\1/p')
+curl -k -s $1 | egrep 'h-name' | \
+sed -n -r 's/^.+<a href="([^\"]+).+$/\1/p' > tempurl1
+(echo $parenturl; cat tempurl1;) | \
+awk '{if(NR==1)p=$1; else printf("%s%s\n",p,$1); }' > tempurl2
+rm tempurl1
+cat tempurl2 | xargs -n 1 curl -k -s | egrep 'nofollow' | \
+sed -n -r 's/^.+href="([^\"]+).+\"_blank\">([^<]+)<.+$/\1 \2/p' | \
+sed -n -r -e '/pdf/p' -e '/docx/p' | \
+sed -r -e 's/\s+$//' -e 's/\s+/_/g' -e 's/pdf_/pdf /' \
+       -e 's/docx_/docx /' | \
+awk '{
+ a[$2]++;
+ if (a[$2]==1) {
+  printf("%s %s\n",$2,$1);
+ } else {
+  printf("%s_%03d %s\n", $2, a[$2], $1);
+ }
+}' > tempurl
+rm tempurl2
+cat tempurl | xargs -n 2 wget --no-check-certificate -q -o log -O
+rm tempurl
+
+
