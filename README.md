@@ -1,6 +1,7 @@
 # dlpdfdocx_t
 
  script for downloading pdf and docx files from teacher's schedule page
+ 
  teachers.io version
 
  Bokwon Yoon (c) 2016
